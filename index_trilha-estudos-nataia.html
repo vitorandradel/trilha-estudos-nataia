@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trilha de Estudos — Professor de Geografia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1c2b33;
+    --paper: #f4f6f4;
+    --paper-2: #ffffff;
+    --line: #cfd8d3;
+    --teal: #2f6e6e;
+    --teal-deep: #1f4d4d;
+    --ochre: #c08a2e;
+    --ochre-soft: #f2e2c2;
+    --clay: #b5482f;
+    --clay-soft: #f4ddd4;
+    --muted: #5d6b66;
+    --shadow: 0 1px 2px rgba(28,43,51,0.06), 0 4px 14px rgba(28,43,51,0.05);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Inter", -apple-system, sans-serif;
+  }
+  body { padding: 22px 16px 60px; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  h1 {
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: clamp(26px, 4vw, 36px);
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+    color: var(--teal-deep);
+  }
+  .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 22px;
+    line-height: 1.5;
+  }
+
+  /* ---- Trail header ---- */
+  .trail-card {
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 22px;
+  }
+  .trail-top {
+    display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 14px;
+  }
+  .trail-top .eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--teal);
+  }
+  .trail-top .today-count {
+    font-size: 13px; color: var(--muted);
+  }
+  .trail-top .today-count b { color: var(--clay); font-weight: 600; }
+
+  svg.route { width: 100%; height: 74px; display: block; overflow: visible; }
+  .route-line-bg { stroke: var(--line); stroke-width: 4; fill: none; }
+  .route-line-fg { stroke: var(--teal); stroke-width: 4; fill: none; stroke-linecap: round; }
+  .flag-dot { fill: var(--paper-2); stroke: var(--clay); stroke-width: 2.5; }
+  .flag-dot.passed { fill: var(--teal); stroke: var(--teal-deep); }
+  .flag-label { font-family: "JetBrains Mono", monospace; font-size: 10.5px; fill: var(--muted); }
+  .flag-date { font-family: "JetBrains Mono", monospace; font-size: 10px; fill: var(--ink); font-weight: 500; }
+  .today-pin { fill: var(--clay); }
+  .today-pin-ring { fill: none; stroke: var(--clay); stroke-width: 1.4; opacity: 0.5; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+  .progress-track { flex: 1; height: 8px; border-radius: 999px; background: var(--ochre-soft); overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--ochre); border-radius: 999px; transition: width .35s ease; }
+  .progress-pct { font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: 500; min-width: 42px; text-align: right; }
+  .progress-caption { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* ---- Phase accordion ---- */
+  details.phase {
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  details.phase[open] { border-color: var(--teal); }
+  summary.phase-head {
+    list-style: none;
+    cursor: pointer;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  summary.phase-head::-webkit-details-marker { display: none; }
+  .chevron {
+    width: 18px; height: 18px; flex: none;
+    transition: transform .2s ease;
+    color: var(--teal);
+  }
+  details[open] .chevron { transform: rotate(90deg); }
+  .phase-head-text { flex: 1; min-width: 0; }
+  .phase-title { font-family: "Fraunces", serif; font-weight: 600; font-size: 16.5px; color: var(--ink); }
+  .phase-dates { font-size: 12px; color: var(--muted); font-family: "JetBrains Mono", monospace; margin-top: 2px; }
+  .phase-current-badge {
+    font-size: 10.5px; font-family: "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .05em;
+    background: var(--clay-soft); color: var(--clay); padding: 3px 8px; border-radius: 999px; flex: none;
+  }
+  .phase-ring-wrap { flex: none; width: 46px; height: 46px; position: relative; }
+  .phase-ring-wrap svg { width: 46px; height: 46px; transform: rotate(-90deg); }
+  .phase-ring-bg { fill: none; stroke: var(--ochre-soft); stroke-width: 5; }
+  .phase-ring-fg { fill: none; stroke: var(--ochre); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset .3s ease; }
+  .phase-ring-txt {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 500; color: var(--ink);
+  }
+
+  .phase-body { padding: 4px 18px 16px; border-top: 1px solid var(--line); }
+
+  .day-card {
+    padding: 12px 4px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .day-card:last-child { border-bottom: none; }
+  .day-head {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px;
+  }
+  .day-head .wd { font-weight: 600; font-size: 13.5px; }
+  .day-head .dt { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); }
+  .today-tag {
+    font-size: 10px; font-family: "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .05em;
+    background: var(--teal); color: white; padding: 2px 7px; border-radius: 999px;
+  }
+  .day-card.is-today { background: rgba(47,110,110,0.05); border-radius: 8px; margin: 0 -8px 4px; padding: 12px 12px; }
+
+  .slot-grid { display: grid; grid-template-columns: 78px 1fr; gap: 6px 10px; }
+  .slot-tag {
+    font-family: "JetBrains Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--muted); padding-top: 2px;
+  }
+  label.task {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13.5px; line-height: 1.4; cursor: pointer;
+    padding: 2px 0;
+  }
+  label.task input[type=checkbox] {
+    margin-top: 3px; width: 15px; height: 15px; accent-color: var(--teal); flex: none; cursor: pointer;
+  }
+  label.task span.txt { transition: color .15s ease, opacity .15s ease; }
+  label.task input:checked ~ span.txt { color: var(--muted); text-decoration: line-through; opacity: 0.75; }
+
+  .special-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; margin: 8px 0; border-radius: 8px;
+    background: var(--ochre-soft); border: 1px solid var(--ochre);
+  }
+  .exam-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; margin: 10px 0 2px; border-radius: 10px;
+    background: var(--clay-soft); border: 1.5px solid var(--clay);
+  }
+  .exam-card .exam-flag { font-size: 20px; }
+  .exam-card .exam-text b { display:block; font-family:"Fraunces", serif; font-size: 15px; color: var(--clay); }
+  .exam-card .exam-text span { font-size: 12px; color: var(--muted); }
+  .exam-card label.task { margin-left: auto; }
+
+  footer.note {
+    font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 18px; padding: 14px 16px;
+    background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px;
+  }
+  .reset-btn {
+    font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--muted);
+    background: none; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px;
+    cursor: pointer; margin-top: 10px;
+  }
+  .reset-btn:hover { border-color: var(--clay); color: var(--clay); }
+
+  @media (max-width: 520px) {
+    .slot-grid { grid-template-columns: 62px 1fr; }
+    .phase-title { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Trilha de Estudos</h1>
+  <p class="subtitle">Professor de Geografia — Cuité de Mamanguape, Pirpirituba e Cruz do Espírito Santo (PB). Marque os blocos conforme for estudando; o progresso fica salvo automaticamente.</p>
+
+  <div class="trail-card">
+    <div class="trail-top">
+      <span class="eyebrow" id="today-label">HOJE</span>
+      <span class="today-count" id="today-count"></span>
+    </div>
+    <svg class="route" id="route-svg" viewBox="0 0 800 74" preserveAspectRatio="none"></svg>
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="overall-fill" style="width:0%"></div></div>
+      <div class="progress-pct" id="overall-pct">0%</div>
+    </div>
+    <div class="progress-caption">tarefas concluídas no plano inteiro</div>
+  </div>
+
+  <div id="phases"></div>
+
+  <footer class="note">
+    Sábado e domingo ficam de fora da lista, exceto nos dias marcados em laranja (véspera de prova, revisão leve) e nos dias de prova. Quando sobrar tempo no fim de semana, use para simulado maior ou para repor o que ficou pendente; quando não sobrar, siga a semana normalmente.
+    <br><button class="reset-btn" id="reset-btn">Zerar todo o progresso</button>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------------- DATA ----------------
+  var phases = [
+    {
+      id: "f1",
+      title: "Fase 1 — Geografia comum aos três concursos e Língua Portuguesa comum",
+      start: "2026-08-11", end: "2026-08-24",
+      week: [
+        {manha:"Revisão rápida de Língua Portuguesa (fichas)", t1:"Geografia: cartografia, clima e relevo (teoria)", t2:"Geografia: mesmo bloco, continuação", t3:"Questões de Geografia"},
+        {manha:"Revisão rápida de Geografia (fichas)", t1:"Língua Portuguesa: morfologia e sintaxe", t2:"Língua Portuguesa: semântica e interpretação textual", t3:"Questões de Língua Portuguesa"},
+        {manha:"Revisão de Geografia", t1:"Geografia: meio ambiente e sustentabilidade", t2:"Geografia: população e urbanização", t3:"Questões mistas"},
+        {manha:"Revisão de Língua Portuguesa", t1:"Geografia: globalização, geopolítica e espaço agrário", t2:"Geografia: formação do território brasileiro", t3:"Questões mistas"},
+        {manha:"Fichas gerais da semana", t1:"Revisão dos dois temas da semana", t2:"Simulado curto (20 a 30 questões)", t3:"Correção e anotação dos erros"}
+      ]
+    },
+    {
+      id: "f2",
+      title: "Fase 2 — Geografia específica de Cuité e Pirpirituba, e Conhecimentos Gerais (Cuité)",
+      start: "2026-08-25", end: "2026-09-07",
+      week: [
+        {manha:"Fichas de Geografia", t1:"Geografia (Cuité): sensoriamento remoto, geoprocessamento, geopolítica clássica", t2:"Geografia (Cuité): Big Data, Geografia da Paraíba, currículo escolar", t3:"Questões de Geografia"},
+        {manha:"Fichas de Geografia", t1:"Geografia (Pirpirituba): fundamentos, cartografia, globalização e geopolítica", t2:"Geografia (Pirpirituba): energia, espaço urbano e espaço agrário", t3:"Questões de Geografia"},
+        {manha:"Fichas de Conhecimentos Gerais", t1:"Conhecimentos Gerais: Brasil e Paraíba, política e economia", t2:"Conhecimentos Gerais: setores econômicos e globalização", t3:"Questões"},
+        {manha:"Fichas de Conhecimentos Gerais", t1:"Conhecimentos Gerais: sustentabilidade e mudanças climáticas", t2:"Conhecimentos Gerais: legislação ambiental", t3:"Questões"},
+        {manha:"Fichas gerais da semana", t1:"Revisão de Geografia e Conhecimentos Gerais", t2:"Simulado curto", t3:"Correção e anotação dos erros"}
+      ]
+    },
+    {
+      id: "f3",
+      title: "Fase 3 — Informática e Didática (Cuité); Legislação Educacional e Pedagógicos (Pirpirituba)",
+      start: "2026-09-08", end: "2026-09-21",
+      week: [
+        {manha:"Fichas de Informática", t1:"Informática: hardware, software e redes", t2:"Informática: segurança da informação e pacote Office", t3:"Questões"},
+        {manha:"Fichas de Informática", t1:"Informática: navegadores, e-mail e ferramentas colaborativas", t2:"Informática: LGPD e direitos autorais", t3:"Questões"},
+        {manha:"Fichas de Didática", t1:"Didática (Cuité): PBL, aprendizagem por projetos, ensino híbrido", t2:"Didática (Cuité): gamificação, neurociência, design thinking", t3:"Questões"},
+        {manha:"Fichas de Legislação Educacional", t1:"Legislação e Currículo (Pirpirituba): LDB, DCN, PNE", t2:"Legislação e Currículo: BNCC e teorias do currículo", t3:"Questões"},
+        {manha:"Fichas gerais da semana", t1:"Revisão de Informática e Didática", t2:"Simulado curto", t3:"Correção e anotação dos erros"}
+      ]
+    },
+    {
+      id: "f4",
+      title: "Fase 4 — Revisão geral de Cuité de Mamanguape",
+      start: "2026-09-22", end: "2026-10-05",
+      week: [
+        {manha:"Fichas de Língua Portuguesa", t1:"Revisão de Língua Portuguesa", t2:"Questões de Língua Portuguesa", t3:"Revisão dos erros anteriores"},
+        {manha:"Fichas de Geografia", t1:"Revisão de Geografia (Cuité)", t2:"Questões de Geografia", t3:"Revisão dos erros anteriores"},
+        {manha:"Fichas de Conhecimentos Gerais", t1:"Revisão de Conhecimentos Gerais", t2:"Questões de Conhecimentos Gerais", t3:"Revisão dos erros anteriores"},
+        {manha:"Fichas de Informática e Didática", t1:"Revisão de Informática", t2:"Revisão de Didática", t3:"Questões mistas"},
+        {manha:"Fichas gerais", t1:"Simulado completo de Cuité (parte 1)", t2:"Simulado completo de Cuité (parte 2)", t3:"Correção geral"}
+      ]
+    },
+    {
+      id: "f5",
+      title: "Fase 5 — Simulados e revisão final de Cuité de Mamanguape",
+      start: "2026-10-06", end: "2026-10-16",
+      week: [
+        {manha:"Revisão de pontos fracos", t1:"Simulado completo", t2:"Correção do simulado", t3:"Revisão dos erros"},
+        {manha:"Revisão de pontos fracos", t1:"Questões por matéria (foco no que errou)", t2:"Questões por matéria", t3:"Revisão dos erros"},
+        {manha:"Revisão de pontos fracos", t1:"Simulado completo", t2:"Correção do simulado", t3:"Revisão dos erros"},
+        {manha:"Revisão de pontos fracos", t1:"Questões por matéria (foco no que errou)", t2:"Questões por matéria", t3:"Revisão dos erros"},
+        {manha:"Revisão geral leve", t1:"Revisão geral leve", t2:"Organização do material para a prova", t3:"Descanso"}
+      ],
+      extra: [
+        {type:"special", date:"2026-10-17", task:"Revisão leve, sem conteúdo novo (véspera da prova)"},
+        {type:"exam", date:"2026-10-18", label:"Prova: Cuité de Mamanguape"}
+      ]
+    },
+    {
+      id: "f6",
+      title: "Fase 6 — Geografia (Pirpirituba) e Legislação Educacional e Currículo",
+      start: "2026-10-19", end: "2026-11-01",
+      week: [
+        {manha:"Fichas de Geografia", t1:"Geografia (Pirpirituba): fundamentos e cartografia", t2:"Geografia (Pirpirituba): globalização e geopolítica", t3:"Questões"},
+        {manha:"Fichas de Geografia", t1:"Geografia (Pirpirituba): natureza, sustentabilidade e energia", t2:"Geografia (Pirpirituba): espaço urbano e espaço agrário", t3:"Questões"},
+        {manha:"Fichas de Legislação", t1:"Legislação e Currículo: LDB, DCN e PNE", t2:"Legislação e Currículo: BNCC e teorias do currículo", t3:"Questões"},
+        {manha:"Fichas de Legislação", t1:"Legislação e Currículo: avaliação de dados educacionais e educação inclusiva", t2:"Legislação e Currículo: didática, planejamento e avaliação escolar", t3:"Questões"},
+        {manha:"Fichas gerais da semana", t1:"Revisão de Geografia e Legislação", t2:"Simulado curto", t3:"Correção e anotação dos erros"}
+      ]
+    },
+    {
+      id: "f7",
+      title: "Fase 7 — Língua Portuguesa (revisão) e aprofundamento em BNCC, LDB e PNE",
+      start: "2026-11-02", end: "2026-11-15",
+      week: [
+        {manha:"Fichas de Língua Portuguesa", t1:"Revisão de Língua Portuguesa: fonologia, morfologia e sintaxe", t2:"Revisão: semântica e interpretação textual", t3:"Questões"},
+        {manha:"Fichas de Língua Portuguesa", t1:"Revisão de Língua Portuguesa: redação oficial e literatura brasileira", t2:"Questões de Língua Portuguesa", t3:"Revisão dos erros"},
+        {manha:"Fichas de Legislação", t1:"Aprofundamento em LDB e BNCC com questões de banca", t2:"Aprofundamento em PNE e teorias do currículo", t3:"Questões"},
+        {manha:"Fichas de Legislação", t1:"Revisão de Geografia (Pirpirituba)", t2:"Questões de Geografia", t3:"Revisão dos erros"},
+        {manha:"Fichas gerais da semana", t1:"Revisão geral da semana", t2:"Simulado curto", t3:"Correção e anotação dos erros"}
+      ]
+    },
+    {
+      id: "f8",
+      title: "Fase 8 — Simulados e revisão final de Pirpirituba",
+      start: "2026-11-16", end: "2026-11-27",
+      week: [
+        {manha:"Revisão de pontos fracos", t1:"Simulado completo", t2:"Correção do simulado", t3:"Revisão dos erros"},
+        {manha:"Revisão de pontos fracos", t1:"Questões por matéria", t2:"Questões por matéria", t3:"Revisão dos erros"},
+        {manha:"Revisão de pontos fracos", t1:"Simulado completo", t2:"Correção do simulado", t3:"Revisão dos erros"},
+        {manha:"Revisão de pontos fracos", t1:"Questões por matéria", t2:"Questões por matéria", t3:"Revisão dos erros"},
+        {manha:"Revisão geral leve", t1:"Revisão geral leve", t2:"Organização do material para a prova", t3:"Descanso"}
+      ],
+      extra: [
+        {type:"special", date:"2026-11-28", task:"Revisão leve, sem conteúdo novo (véspera da prova)"},
+        {type:"exam", date:"2026-11-29", label:"Prova: Pirpirituba"}
+      ]
+    },
+    {
+      id: "f9",
+      title: "Fase 9 — Geografia (Cruz do Espírito Santo), Língua Portuguesa própria, Raciocínio Lógico e Tecnologia na Educação",
+      start: "2026-11-30", end: "2026-12-13",
+      week: [
+        {manha:"Fichas de Geografia", t1:"Geografia (Cruz): cartografia, coordenadas e fusos horários", t2:"Geografia (Cruz): estrutura da Terra, tectônica e relevo", t3:"Questões"},
+        {manha:"Fichas de Geografia", t1:"Geografia (Cruz): clima e hidrografia", t2:"Geografia (Cruz): vegetação, biomas e recursos naturais", t3:"Questões"},
+        {manha:"Fichas de Geografia", t1:"Geografia (Cruz): problemas ambientais e sustentabilidade", t2:"Geografia (Cruz): população, urbanização e espaço rural", t3:"Questões"},
+        {manha:"Fichas de Língua Portuguesa", t1:"Língua Portuguesa (redação própria): fonologia, morfologia e redação oficial", t2:"Raciocínio Lógico: lógica proposicional e sequências", t3:"Questões de Raciocínio Lógico"},
+        {manha:"Fichas de Tecnologia na Educação", t1:"Tecnologia na Educação: AVA, EAD e TIC", t2:"Revisão da semana", t3:"Simulado curto"}
+      ]
+    },
+    {
+      id: "f10",
+      title: "Fase 10 — Avaliação da Aprendizagem, Psicologia Educacional e Direito Constitucional (se confirmado)",
+      start: "2026-12-14", end: "2026-12-17",
+      week: [
+        {manha:"Fichas de Psicologia Educacional", t1:"Piaget, Vygotsky e Kohlberg", t2:"Gardner, Hoffmann, Ausubel e Wallon", t3:"Questões"},
+        {manha:"Fichas de Psicologia Educacional", t1:"Avaliação diagnóstica, formativa e somativa", t2:"Inclusão escolar e psicopedagogia", t3:"Questões"},
+        {manha:"Fichas de Direito Constitucional (se confirmado)", t1:"Direitos e garantias fundamentais, organização do Estado", t2:"Controle de constitucionalidade e organização dos poderes", t3:"Questões"},
+        {manha:"Fichas gerais", t1:"Simulado completo de Cruz do Espírito Santo", t2:"Correção do simulado", t3:"Revisão dos erros"},
+        {manha:"", t1:"", t2:"", t3:""}
+      ]
+    },
+    {
+      id: "f11",
+      title: "Fase 11 — Revisão final geral",
+      start: "2026-12-18", end: "2026-12-18",
+      week: [
+        {manha:"", t1:"", t2:"", t3:""},
+        {manha:"", t1:"", t2:"", t3:""},
+        {manha:"", t1:"", t2:"", t3:""},
+        {manha:"", t1:"", t2:"", t3:""},
+        {manha:"Revisão leve de Geografia", t1:"Revisão leve de Língua Portuguesa e Raciocínio Lógico", t2:"Revisão leve de Legislação e Psicologia Educacional", t3:"Descanso"}
+      ],
+      extra: [
+        {type:"special", date:"2026-12-19", task:"Revisão leve, sem conteúdo novo (véspera da prova)"},
+        {type:"exam", date:"2026-12-20", label:"Prova: Cruz do Espírito Santo"}
+      ]
+    }
+  ];
+
+  var EXAMS = [
+    {date:"2026-10-18", label:"Cuité"},
+    {date:"2026-11-29", label:"Pirpirituba"},
+    {date:"2026-12-20", label:"Cruz do E.S."}
+  ];
+  var TRAIL_START = "2026-08-11";
+  var TRAIL_END = "2026-12-20";
+
+  // ---------------- DATE HELPERS ----------------
+  function parseISO(s) {
+    var p = s.split("-");
+    return new Date(parseInt(p[0],10), parseInt(p[1],10)-1, parseInt(p[2],10));
+  }
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function isoOf(d) { return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()); }
+  function fmtShort(d) { return pad2(d.getDate()) + "/" + pad2(d.getMonth()+1); }
+  function addDays(d, n) { var r = new Date(d); r.setDate(r.getDate()+n); return r; }
+  function dayDiff(a, b) { return Math.round((b - a) / 86400000); }
+  var WD_NAMES = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
+  var todayDate = new Date();
+  todayDate.setHours(0,0,0,0);
+  var todayISO = isoOf(todayDate);
+
+  // ---------------- BUILD DAY LISTS ----------------
+  function buildPhaseDays(phase) {
+    var days = [];
+    var start = parseISO(phase.start), end = parseISO(phase.end);
+    var cursor = new Date(start);
+    while (cursor <= end) {
+      var wd = cursor.getDay(); // 0=Sun..6=Sat
+      if (wd >= 1 && wd <= 5) {
+        var tpl = phase.week[wd-1];
+        days.push({
+          type: "day",
+          date: isoOf(cursor),
+          weekday: WD_NAMES[wd],
+          tasks: tpl
+        });
+      }
+      cursor = addDays(cursor, 1);
+    }
+    if (phase.extra) {
+      phase.extra.forEach(function (ex) { days.push(ex); });
+    }
+    return days;
+  }
+
+  phases.forEach(function (ph) { ph.days = buildPhaseDays(ph); });
+
+  // ---------------- TASK ID LIST (for a phase) ----------------
+  function taskIdsOf(day, phaseId) {
+    if (day.type === "special") return [phaseId + "_" + day.date + "_special"];
+    if (day.type === "exam") return [phaseId + "_" + day.date + "_exam"];
+    var ids = [];
+    ["manha","t1","t2","t3"].forEach(function (slot) {
+      if (day.tasks[slot] && day.tasks[slot].length) ids.push(phaseId + "_" + day.date + "_" + slot);
+    });
+    return ids;
+  }
+
+  // ---------------- STORAGE ----------------
+  // Usa localStorage do navegador: funciona em qualquer site (inclui GitHub Pages),
+  // mas o progresso fica salvo por navegador/aparelho, não sincroniza entre dispositivos.
+  var STORAGE_KEY = "natalia_geografia_trilha_v1";
+  var state = {};
+
+  function loadState() {
+    try {
+      var raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) state = JSON.parse(raw);
+    } catch (e) { state = {}; }
+    return Promise.resolve();
+  }
+  function saveState() {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) { /* localStorage indisponível (ex: aba anônima) */ }
+  }
+
+  // ---------------- RENDER ----------------
+  var phasesEl = document.getElementById("phases");
+  var slotLabel = {manha:"manhã", t1:"tarde 1", t2:"tarde 2", t3:"tarde 3"};
+
+  function countPhaseProgress(ph) {
+    var total = 0, done = 0;
+    ph.days.forEach(function (day) {
+      taskIdsOf(day, ph.id).forEach(function (id) {
+        total++;
+        if (state[id]) done++;
+      });
+    });
+    return {done: done, total: total};
+  }
+
+  function countOverallProgress() {
+    var total = 0, done = 0;
+    phases.forEach(function (ph) {
+      var c = countPhaseProgress(ph);
+      total += c.total; done += c.done;
+    });
+    return {done: done, total: total};
+  }
+
+  function isPhaseCurrent(ph) {
+    var s = parseISO(ph.start), e = parseISO(ph.end);
+    var lastDate = e;
+    if (ph.extra) {
+      ph.extra.forEach(function (ex) { var d = parseISO(ex.date); if (d > lastDate) lastDate = d; });
+    }
+    return todayDate >= s && todayDate <= lastDate;
+  }
+
+  function makeCheckbox(id, text) {
+    var label = document.createElement("label");
+    label.className = "task";
+    var input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = !!state[id];
+    input.addEventListener("change", function () {
+      state[id] = input.checked;
+      saveState();
+      refreshProgressUI();
+    });
+    var span = document.createElement("span");
+    span.className = "txt";
+    span.textContent = text;
+    label.appendChild(input);
+    label.appendChild(span);
+    return label;
+  }
+
+  function renderDay(day, phaseId) {
+    if (day.type === "special") {
+      var card = document.createElement("div");
+      card.className = "special-card";
+      var id = phaseId + "_" + day.date + "_special";
+      var dEl = document.createElement("div");
+      dEl.style.fontFamily = "'JetBrains Mono', monospace";
+      dEl.style.fontSize = "12px";
+      dEl.style.color = "var(--muted)";
+      dEl.style.flex = "none";
+      dEl.textContent = fmtShort(parseISO(day.date)) + " · sáb";
+      card.appendChild(dEl);
+      card.appendChild(makeCheckbox(id, day.task));
+      return card;
+    }
+    if (day.type === "exam") {
+      var ecard = document.createElement("div");
+      ecard.className = "exam-card";
+      var flag = document.createElement("div");
+      flag.className = "exam-flag";
+      flag.textContent = "🚩";
+      var textWrap = document.createElement("div");
+      textWrap.className = "exam-text";
+      var b = document.createElement("b");
+      b.textContent = day.label;
+      var sp = document.createElement("span");
+      sp.textContent = fmtShort(parseISO(day.date)) + " · dia da prova";
+      textWrap.appendChild(b);
+      textWrap.appendChild(sp);
+      var eid = phaseId + "_" + day.date + "_exam";
+      var cb = makeCheckbox(eid, "Prova realizada");
+      ecard.appendChild(flag);
+      ecard.appendChild(textWrap);
+      ecard.appendChild(cb);
+      return ecard;
+    }
+
+    var dEl2 = document.createElement("div");
+    var d = parseISO(day.date);
+    var isToday = day.date === todayISO;
+    dEl2.className = "day-card" + (isToday ? " is-today" : "");
+
+    var head = document.createElement("div");
+    head.className = "day-head";
+    var wdSpan = document.createElement("span");
+    wdSpan.className = "wd";
+    wdSpan.textContent = day.weekday;
+    var dtSpan = document.createElement("span");
+    dtSpan.className = "dt";
+    dtSpan.textContent = fmtShort(d);
+    head.appendChild(wdSpan);
+    head.appendChild(dtSpan);
+    if (isToday) {
+      var tag = document.createElement("span");
+      tag.className = "today-tag";
+      tag.textContent = "hoje";
+      head.appendChild(tag);
+    }
+    dEl2.appendChild(head);
+
+    var grid = document.createElement("div");
+    grid.className = "slot-grid";
+    ["manha","t1","t2","t3"].forEach(function (slot) {
+      var text = day.tasks[slot];
+      if (!text) return;
+      var tagEl = document.createElement("div");
+      tagEl.className = "slot-tag";
+      tagEl.textContent = slotLabel[slot];
+      grid.appendChild(tagEl);
+      grid.appendChild(makeCheckbox(phaseId + "_" + day.date + "_" + slot, text));
+    });
+    dEl2.appendChild(grid);
+    return dEl2;
+  }
+
+  function renderPhase(ph) {
+    var det = document.createElement("details");
+    det.className = "phase";
+    det.id = "phase-" + ph.id;
+    if (isPhaseCurrent(ph)) det.open = true;
+
+    var summary = document.createElement("summary");
+    summary.className = "phase-head";
+
+    var chev = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    chev.setAttribute("class", "chevron");
+    chev.setAttribute("viewBox", "0 0 24 24");
+    chev.setAttribute("fill", "none");
+    chev.innerHTML = '<path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';
+
+    var textWrap = document.createElement("div");
+    textWrap.className = "phase-head-text";
+    var titleEl = document.createElement("div");
+    titleEl.className = "phase-title";
+    titleEl.textContent = ph.title;
+    var datesEl = document.createElement("div");
+    datesEl.className = "phase-dates";
+    datesEl.textContent = fmtShort(parseISO(ph.start)) + " – " + fmtShort(parseISO((ph.extra ? ph.extra[ph.extra.length-1].date : ph.end)));
+    textWrap.appendChild(titleEl);
+    textWrap.appendChild(datesEl);
+
+    var ringWrap = document.createElement("div");
+    ringWrap.className = "phase-ring-wrap";
+    ringWrap.id = "ring-" + ph.id;
+    var R = 18, C = 2 * Math.PI * R;
+    ringWrap.innerHTML =
+      '<svg viewBox="0 0 46 46">' +
+        '<circle class="phase-ring-bg" cx="23" cy="23" r="'+R+'"></circle>' +
+        '<circle class="phase-ring-fg" cx="23" cy="23" r="'+R+'" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'"></circle>' +
+      '</svg>' +
+      '<div class="phase-ring-txt">0%</div>';
+
+    summary.appendChild(chev);
+    summary.appendChild(textWrap);
+    if (isPhaseCurrent(ph)) {
+      var badge = document.createElement("span");
+      badge.className = "phase-current-badge";
+      badge.textContent = "em curso";
+      summary.appendChild(badge);
+    }
+    summary.appendChild(ringWrap);
+    det.appendChild(summary);
+
+    var body = document.createElement("div");
+    body.className = "phase-body";
+    ph.days.forEach(function (day) { body.appendChild(renderDay(day, ph.id)); });
+    det.appendChild(body);
+
+    return det;
+  }
+
+  function refreshProgressUI() {
+    var overall = countOverallProgress();
+    var pct = overall.total ? Math.round(100 * overall.done / overall.total) : 0;
+    document.getElementById("overall-fill").style.width = pct + "%";
+    document.getElementById("overall-pct").textContent = pct + "%";
+
+    phases.forEach(function (ph) {
+      var c = countPhaseProgress(ph);
+      var p = c.total ? Math.round(100 * c.done / c.total) : 0;
+      var wrap = document.getElementById("ring-" + ph.id);
+      if (!wrap) return;
+      var R = 18, C = 2 * Math.PI * R;
+      var fg = wrap.querySelector(".phase-ring-fg");
+      fg.style.strokeDashoffset = (C * (1 - p/100)).toFixed(1);
+      wrap.querySelector(".phase-ring-txt").textContent = p + "%";
+    });
+  }
+
+  function renderTrailSvg() {
+    var svg = document.getElementById("route-svg");
+    var s = parseISO(TRAIL_START), e = parseISO(TRAIL_END);
+    var totalDays = dayDiff(s, e);
+    var W = 800, y = 34, xPad = 14;
+    function xOf(dateStr) {
+      var d = parseISO(dateStr);
+      var frac = Math.max(0, Math.min(1, dayDiff(s, d) / totalDays));
+      return xPad + frac * (W - 2*xPad);
+    }
+    var todayFrac = Math.max(0, Math.min(1, dayDiff(s, todayDate) / totalDays));
+    var todayX = xPad + todayFrac * (W - 2*xPad);
+
+    var html = "";
+    html += '<line class="route-line-bg" x1="'+xPad+'" y1="'+y+'" x2="'+(W-xPad)+'" y2="'+y+'"></line>';
+    html += '<line class="route-line-fg" x1="'+xPad+'" y1="'+y+'" x2="'+todayX+'" y2="'+y+'"></line>';
+
+    EXAMS.forEach(function (ex) {
+      var x = xOf(ex.date);
+      var passed = parseISO(ex.date) < todayDate;
+      html += '<circle class="flag-dot'+(passed?" passed":"")+'" cx="'+x+'" cy="'+y+'" r="7"></circle>';
+      html += '<text class="flag-date" x="'+x+'" y="'+(y-14)+'" text-anchor="middle">'+fmtShort(parseISO(ex.date))+'</text>';
+      html += '<text class="flag-label" x="'+x+'" y="'+(y+22)+'" text-anchor="middle">'+ex.label+'</text>';
+    });
+
+    html += '<circle class="today-pin-ring" cx="'+todayX+'" cy="'+y+'" r="10"></circle>';
+    html += '<circle class="today-pin" cx="'+todayX+'" cy="'+y+'" r="4.5"></circle>';
+
+    svg.innerHTML = html;
+
+    document.getElementById("today-label").textContent = "HOJE · " + fmtShort(todayDate);
+    var nextExam = EXAMS.filter(function(ex){ return parseISO(ex.date) >= todayDate; })[0];
+    var countEl = document.getElementById("today-count");
+    if (nextExam) {
+      var days = dayDiff(todayDate, parseISO(nextExam.date));
+      countEl.innerHTML = "faltam <b>" + days + " dias</b> para a prova de " + nextExam.label;
+    } else {
+      countEl.textContent = "todas as provas já passaram";
+    }
+  }
+
+  function init() {
+    phases.forEach(function (ph) { phasesEl.appendChild(renderPhase(ph)); });
+    renderTrailSvg();
+    refreshProgressUI();
+
+    var current = phases.filter(isPhaseCurrent)[0];
+    if (current) {
+      setTimeout(function () {
+        var el = document.getElementById("phase-" + current.id);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 250);
+    }
+
+    document.getElementById("reset-btn").addEventListener("click", function () {
+      if (confirm("Zerar todo o progresso marcado até agora?")) {
+        state = {};
+        saveState();
+        document.querySelectorAll('input[type=checkbox]').forEach(function (cb) { cb.checked = false; });
+        refreshProgressUI();
+      }
+    });
+  }
+
+  loadState().then(init);
+})();
+</script>
+</body>
+</html>
